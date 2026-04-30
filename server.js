@@ -14,12 +14,20 @@ const USERS_FILE = "users.json";
 const JWT_SECRET = "mysecretkey";
 
 function loadUsers() {
-    const data = fs.readFileSync(USERS_FILE, "utf8");
-    return JSON.parse(data);
+    try {
+        const data = fs.readFileSync(USERS_FILE, "utf8");
+        return JSON.parse(data);
+    } catch (err) {
+        return [];
+    }
 }
 
 function saveUsers(users) {
-    fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2));
+    try {
+        fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2));
+    } catch (err) {
+        console.log("Error saving users:", err);
+    }
 }
 
 app.get("/", (req, res) => {
