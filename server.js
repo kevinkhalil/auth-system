@@ -8,6 +8,7 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
+app.use(express.static(__dirname));
 
 const USERS_FILE = "users.json";
 const JWT_SECRET = "mysecretkey";
