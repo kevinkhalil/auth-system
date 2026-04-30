@@ -2,7 +2,16 @@ const express = require("express");
 const cors = require("cors");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const fs = require("fs");
+const mongoose = require("mongoose");
+
+mongoose.connect("mongodb+srv://kevingkhalil2005_db_user:eBI1IQGC2fdwkNvb@cluster0.vkw9u3l.mongodb.net/authDB?retryWrites=true&w=majority")
+.then(() => console.log("MongoDB connected"))
+.catch(err => console.log(err));
+
+const User = mongoose.model("User", {
+    email: String,
+    password: String
+});
 
 const app = express();
 
@@ -10,25 +19,7 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(__dirname));
 
-const USERS_FILE = "users.json";
 const JWT_SECRET = "mysecretkey";
-
-function loadUsers() {
-    try {
-        const data = fs.readFileSync(USERS_FILE, "utf8");
-        return JSON.parse(data);
-    } catch (err) {
-        return [];
-    }
-}
-
-function saveUsers(users) {
-    try {
-        fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2));
-    } catch (err) {
-        console.log("Error saving users:", err);
-    }
-}
 
 app.get("/", (req, res) => {
     res.send("Auth system server is running");
@@ -37,24 +28,20 @@ app.get("/", (req, res) => {
 app.post("/register", async (req, res) => {
     const { email, password } = req.body;
 
-    const users = loadUsers();
-
-    const existingUser = users.find(user => user.email === email);
+    const existingUser = await User.findOne({ email });
 
     if (existingUser) {
-        return res.status(400).json({ message: "User already exists" });
+        return res.json({ message: "User already exists" });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const newUser = {
-        id: Date.now(),
-        email: email,
+    const newUser = new User({
+        email,
         password: hashedPassword
-    };
+    });
 
-    users.push(newUser);
-    saveUsers(users);
+    await newUser.save();
 
     res.json({ message: "User registered successfully" });
 });
@@ -62,22 +49,20 @@ app.post("/register", async (req, res) => {
 app.post("/login", async (req, res) => {
     const { email, password } = req.body;
 
-    const users = loadUsers();
-
-    const user = users.find(user => user.email === email);
+    const user = await User.findOne({ email });
 
     if (!user) {
-        return res.status(400).json({ message: "Invalid email or password" });
+        return res.json({ message: "User not found" });
     }
 
     const isPasswordCorrect = await bcrypt.compare(password, user.password);
 
     if (!isPasswordCorrect) {
-        return res.status(400).json({ message: "Invalid email or password" });
+        return res.json({ message: "Invalid email or password" });
     }
 
     const token = jwt.sign(
-        { id: user.id, email: user.email },
+        { id: user._id, email: user.email },
         JWT_SECRET,
         { expiresIn: "1h" }
     );
