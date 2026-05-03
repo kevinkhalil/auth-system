@@ -10,7 +10,7 @@ async function register() {
     const email = document.getElementById("regEmail").value;
     const password = document.getElementById("regPassword").value;
 
-    const res = await fetch(API + "/register", {
+    const res = await fetch(API_URL + "/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password })
@@ -24,7 +24,7 @@ async function login() {
     const email = document.getElementById("loginEmail").value;
     const password = document.getElementById("loginPassword").value;
 
-    const res = await fetch(API + "/login", {
+    const res = await fetch(API_URL + "/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password })
@@ -42,7 +42,7 @@ async function login() {
 }
 
 async function getProfile() {
-    const res = await fetch(API + "/profile", {
+    const res = await fetch(API_URL + "/profile", {
         headers: {
             "Authorization": "Bearer " + token
         }
