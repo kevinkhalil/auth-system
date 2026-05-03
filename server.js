@@ -3,8 +3,9 @@ const cors = require("cors");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const mongoose = require("mongoose");
+require("dotenv").config();
 
-mongoose.connect("mongodb+srv://kevingkhalil2005_db_user:eBI1IQGC2fdwkNvb@cluster0.vkw9u3l.mongodb.net/authDB?retryWrites=true&w=majority")
+mongoose.connect(process.env.MONGO_URL)
 .then(() => console.log("MongoDB connected"))
 .catch(err => console.log(err));
 
@@ -19,7 +20,7 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(__dirname));
 
-const JWT_SECRET = "mysecretkey";
+const JWT_SECRET = process.env.JWT_SECRET;
 
 app.get("/", (req, res) => {
     res.send("Auth system server is running");
@@ -61,11 +62,11 @@ app.post("/login", async (req, res) => {
         return res.json({ message: "Invalid email or password" });
     }
 
-    const token = jwt.sign(
-        { id: user._id, email: user.email },
-        JWT_SECRET,
-        { expiresIn: "1h" }
-    );
+   const token = jwt.sign(
+  { id: user._id, email: user.email },
+  JWT_SECRET,
+  { expiresIn: "1h" }
+);
 
     res.json({
         message: "Login successful",
