@@ -1,4 +1,4 @@
-const API = "https://auth-system-6205.onrender.com";
+const API_URL = "https://auth-system-6205.onrender.com";
 
 let token = localStorage.getItem("token") || "";
 
